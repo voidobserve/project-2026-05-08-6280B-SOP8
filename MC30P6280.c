@@ -24,7 +24,7 @@ volatile bat_lev_t cur_cmp_bat_lev = 0;
 */
 volatile bat_lev_t tmp_bat_lev = 0;
 volatile bat_lev_t bat_lev = 0; // 稳定之后的、电池电压挡位
-volatile u16 pwr_off_cnt = 0;   // 5min 自动关机的倒计时
+volatile u32 pwr_off_cnt = 0;   // 30 min 自动关机的倒计时
 /*
     设备没有开机、并且没有在充电，累计计数，
     满足一定时间后进入低功耗
@@ -696,7 +696,7 @@ void main(void)
             如果不在充电并且设备不在运行，2s后进入低功耗
             改成直接进低功耗
         */
-        if ((flag_is_dev_working && pwr_off_cnt >= (u16)((u32)5 * 60 * 1000 / 10)) ||
+        if ((flag_is_dev_working && pwr_off_cnt >= ((u32)30 * 60 * 1000 / 10)) ||
             into_low_power_cnt >= (u8)((u16)2000 / 10)) {
             // (flag_is_dev_working == 0 && flag_is_in_charging == 0)) {
         label_low_power_in: // 标签，进入低功耗
@@ -823,7 +823,7 @@ void int_isr(void) __interrupt
 
                 if (flag_is_dev_working) {
                     // 防止计数溢出
-                    if (pwr_off_cnt < (u16)((u32)5 * 60 * 1000 / 10)) {
+                    if (pwr_off_cnt < ((u32)30 * 60 * 1000 / 10)) {
                         pwr_off_cnt++;
                     }
                 } else {
@@ -921,15 +921,15 @@ void int_isr(void) __interrupt
         led_refresh();
 
         // 如果检测到的振动传感器传来的信号，当前检测脚的电平跟上次的不一样
-        if ((VIBRATION_SENSOR_PIN && last_vibration_sensor_lev == 0) ||
-            (VIBRATION_SENSOR_PIN == 0 && last_vibration_sensor_lev)) {
+        // if ((VIBRATION_SENSOR_PIN && last_vibration_sensor_lev == 0) ||
+        //     (VIBRATION_SENSOR_PIN == 0 && last_vibration_sensor_lev)) {
 
-            // 在这里添加清空关机的计时操作
-            pwr_off_cnt = 0;
+        //     // 在这里添加清空关机的计时操作
+        //     pwr_off_cnt = 0;
 
-            last_vibration_sensor_lev = VIBRATION_SENSOR_PIN;
-            // printf("detect lev\n"); // 测试可以检测到电平变化
-        }
+        //     last_vibration_sensor_lev = VIBRATION_SENSOR_PIN;
+        //     // printf("detect lev\n"); // 测试可以检测到电平变化
+        // }
 #endif
     }
 
